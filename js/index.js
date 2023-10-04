@@ -6,9 +6,14 @@ async function getCountries(){
 }
 
 function showCountries(data) {
-    let ul = document.querySelector("ul");
+    let ul = document.querySelector("select");
+    let html = "";
 
-    ul.innerHTML = JSON.parse(data);
+    for (const pays of data) {
+        html += "<option value='" + pays.name.common + "'> " + pays.name.common + " </option>";
+    }
+
+    ul.innerHTML = html;
 }
 
 getCountries();
