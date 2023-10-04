@@ -1,8 +1,15 @@
-async function getCountries(){
-    var tab = [];
+async function getCountries() {
+    var countries = [];
     var response = await fetch("https://restcountries.com/v3.1/all")
         .then((response) => response.json())
-        .then((data) => showCountries(data));
+        .then((data) => {
+            for (let i = 0; i < data.length; i++) {
+                countries.push(data[i]['translations']['fra']['official']);
+            }
+        });
+    console.log(countries)
+    showCountries(countries);
+    localStorage.setItem('countries', JSON.stringify(countries));
 }
 
 function showCountries(data) {
@@ -10,10 +17,17 @@ function showCountries(data) {
     let html = "";
 
     for (const pays of data) {
-        html += "<option value='" + pays.name.common + "'> " + pays.name.common + " </option>";
+        html += "<option value='" + pays + "'> " + pays + " </option>";
     }
 
     ul.innerHTML = html;
 }
 
-getCountries();
+let local = localStorage.getItem('countries');
+let localCountries = JSON.parse(local);
+if (localCountries != null) {
+    showCountries(localCountries);
+}
+else {
+    getCountries();
+}
