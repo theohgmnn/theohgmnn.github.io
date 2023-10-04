@@ -8,7 +8,7 @@ async function getCountries(){
 function showCountries(data) {
     let ul = document.querySelector("ul");
 
-    ul.innerHTML = data;
+    ul.innerHTML = JSON.parse(data);
 }
 
 getCountries();
