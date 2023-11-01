@@ -1,0 +1,16 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+h1, p {
+    text-align: center;
+}
+
+#map {
+    margin: auto;
+    border: 1px solid #000000;
+    height: 70%;
+    width: 80%;
+}
