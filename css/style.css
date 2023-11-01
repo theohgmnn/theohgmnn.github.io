@@ -8,9 +8,22 @@ h1, p {
     text-align: center;
 }
 
+section {
+    margin: auto;
+    height: 80%;
+    width: 90%;
+    overflow: hidden;
+}
+
 #map {
     margin: auto;
     border: 1px solid #000000;
-    height: 70%;
-    width: 80%;
+    height: 100%;
+    width: 100%;
+}
+
+#myVideo, #myCanvas {
+    margin: auto;
+    width: 100%;
+    height: 90%;
 }

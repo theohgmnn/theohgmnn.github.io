@@ -1,12 +1,71 @@
-var map = L.map('map').setView([46.2043907, 6.1431577], 12);
+let map = L.map('map').setView([46.2043907, 6.1431577], 12);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-function onMapClick(e) {
-    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+map.on('click', (e) => { onMapClick(e) });
+
+document.querySelector("#return").addEventListener('click', () => {
+    let sectionMap = document.querySelector("#sectionMap");
+    let sectionVideo = document.querySelector("#sectionVideo");
+    let sectionPicture = document.querySelector("#sectionPicture");
+
+    sectionMap.style.display = "block";
+    sectionVideo.style.display = "none";
+    sectionPicture.style.display = "none"
+})
+
+if (localStorage.getItem("markers") != null) {
+    let markers = JSON.parse(localStorage.getItem("markers"));
+    for (const point of markers) {
+        console.log(point)
+        let marker = L.marker([parseFloat(point.lat), parseFloat(point.lng)]).on('click', (e) => { onMarkerClick(e, true) });
+        marker.addTo(map);
+    }
 }
 
-map.on('click', onMapClick);
+async function onMarkerClick(e, inLocal = false) {
+    const constraints = {
+        video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: { exact: "environment" },
+        }
+    };
+
+    let stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    let myVideo = document.querySelector("#myVideo");
+    let sectionMap = document.querySelector("#sectionMap");
+    let sectionVideo = document.querySelector("#sectionVideo");
+    let sectionPicture = document.querySelector("#sectionPicture");
+
+    sectionMap.style.display = "none";
+    sectionVideo.style.display = "block";
+
+    myVideo.srcObject = stream;
+
+    let btnPicture = document.querySelector("#picture");
+    btnPicture.addEventListener("click", () => {
+        let myCanvas = document.querySelector("#myCanvas");
+        myCanvas.width = myVideo.videoWidth;
+        myCanvas.height = myVideo.videoHeight;
+        myCanvas.getContext('2d').drawImage(myVideo, 0, 0);
+
+        myVideo.srcObject.getTracks().forEach(track => track.stop())
+
+        sectionVideo.style.display = "none";
+        sectionPicture.style.display = "block";
+
+        let picture = myCanvas.toDataURL();
+
+        localStorage.setItem("markers", `lat: ${e.latlng.lat}, lng: ${e.latlng.lng}, picture: ${picture}`);
+    })
+}
+
+function onMapClick(e) {
+    let marker = L.marker([e.latlng.lat, e.latlng.lng]).on('click', (e) => { onMarkerClick(e) });
+    marker.addTo(map);
+}
