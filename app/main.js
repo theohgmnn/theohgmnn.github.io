@@ -20,7 +20,6 @@ document.querySelector("#return").addEventListener('click', () => {
 if (localStorage.getItem("markers") != null) {
     let markers = JSON.parse(localStorage.getItem("markers"));
     for (const point of markers) {
-        console.log(point)
         let marker = L.marker([parseFloat(point.lat), parseFloat(point.lng)]).on('click', (e) => { onMarkerClick(e, true) });
         marker.addTo(map);
     }
@@ -49,6 +48,7 @@ async function onMarkerClick(e, inLocal = false) {
 
     let btnPicture = document.querySelector("#picture");
     btnPicture.addEventListener("click", () => {
+        console.log("click")
         let myCanvas = document.querySelector("#myCanvas");
         myCanvas.width = myVideo.videoWidth;
         myCanvas.height = myVideo.videoHeight;
@@ -61,7 +61,21 @@ async function onMarkerClick(e, inLocal = false) {
 
         let picture = myCanvas.toDataURL();
 
-        localStorage.setItem("markers", `lat: ${e.latlng.lat}, lng: ${e.latlng.lng}, picture: ${picture}`);
+        let markers = [];
+        let marker = { lat: e.latlng.lat, lng: e.latlng.lng, picture: picture };
+        markers.push(marker);
+
+        let storage = JSON.parse(localStorage.getItem("markers"));
+        console.log(storage)
+        if (storage != null) {
+            for (const mark of storage) {
+                markers.push(mark);
+            }
+        }
+
+        console.log(markers);
+
+        localStorage.setItem("markers", JSON.stringify(markers));
     })
 }
 
