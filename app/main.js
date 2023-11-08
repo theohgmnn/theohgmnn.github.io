@@ -20,12 +20,33 @@ document.querySelector("#return").addEventListener('click', () => {
 if (localStorage.getItem("markers") != null) {
     let markers = JSON.parse(localStorage.getItem("markers"));
     for (const point of markers) {
-        let marker = L.marker([parseFloat(point.lat), parseFloat(point.lng)]).on('click', (e) => { onMarkerClick(e, true) });
+        let marker = L.marker([parseFloat(point.lat), parseFloat(point.lng)]).on('click', (e) => { onMarkerClick(e) });
         marker.addTo(map);
     }
 }
 
-async function onMarkerClick(e, inLocal = false) {
+async function onMarkerClick(e) {
+    let storage = JSON.parse(localStorage.getItem("markers"));
+
+    if (storage != null) {
+        for (const marker of storage) {
+            if (marker.lat == e.lat && marker.lng == e.lng) {
+                let sectionMap = document.querySelector("#sectionMap");
+                let sectionMarker = document.querySelector("#sectionMarker");
+                let img = document.querySelector("#sectionMarker img");
+                let pLat = document.querySelector("p#lat")
+                let pLng = document.querySelector("p#lng")
+    
+                sectionMap.style.display = "none";
+                sectionMarker.style.display = "block";
+    
+                img.src = marker.picture;
+                pLat.innerHTML = `Lat: ${marker.lat}`;
+                pLng.innerHTML = `Lng: ${marker.lng}`;
+            }
+        }
+    }
+
     const constraints = {
         video: {
             width: { ideal: 1280 },
