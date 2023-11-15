@@ -1,4 +1,5 @@
 let map = L.map('map').setView([46.2043907, 6.1431577], 12);
+let latlng;
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -8,10 +9,6 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 map.on('click', (e) => { onMapClick(e) });
 
 document.querySelector("#return").addEventListener('click', () => {
-    let sectionMap = document.querySelector("#sectionMap");
-    let sectionVideo = document.querySelector("#sectionVideo");
-    let sectionPicture = document.querySelector("#sectionPicture");
-
     sectionMap.style.display = "block";
     sectionVideo.style.display = "none";
     sectionPicture.style.display = "none"
@@ -25,24 +22,28 @@ if (localStorage.getItem("markers") != null) {
     }
 }
 
-async function onMarkerClick(e) {
+btnPicture.addEventListener("click", () => btnPictureClick());
+
+function onMapClick(e) {
+    let marker = L.marker([e.latlng.lat, e.latlng.lng]).on('click', (e) => { onMarkerClick(e) });
+    latlng = e.latlng;
+    marker.addTo(map);
+}
+
+async function onMarkerClick() {
     let storage = JSON.parse(localStorage.getItem("markers"));
 
     if (storage != null) {
         for (const marker of storage) {
             if (marker.lat == e.lat && marker.lng == e.lng) {
-                let sectionMap = document.querySelector("#sectionMap");
-                let sectionMarker = document.querySelector("#sectionMarker");
                 let img = document.querySelector("#sectionMarker img");
-                let pLat = document.querySelector("p#lat")
-                let pLng = document.querySelector("p#lng")
-    
+
                 sectionMap.style.display = "none";
                 sectionMarker.style.display = "block";
-    
+
                 img.src = marker.picture;
-                pLat.innerHTML = `Lat: ${marker.lat}`;
-                pLng.innerHTML = `Lng: ${marker.lng}`;
+                lat.innerHTML = `Lat: ${marker.lat}`;
+                lng.innerHTML = `Lng: ${marker.lng}`;
             }
         }
     }
@@ -57,50 +58,37 @@ async function onMarkerClick(e) {
 
     let stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-    let myVideo = document.querySelector("#myVideo");
-    let sectionMap = document.querySelector("#sectionMap");
-    let sectionVideo = document.querySelector("#sectionVideo");
-    let sectionPicture = document.querySelector("#sectionPicture");
-
     sectionMap.style.display = "none";
     sectionVideo.style.display = "block";
 
     myVideo.srcObject = stream;
-
-    let btnPicture = document.querySelector("#picture");
-    btnPicture.addEventListener("click", () => {
-        console.log("click")
-        let myCanvas = document.querySelector("#myCanvas");
-        myCanvas.width = myVideo.videoWidth;
-        myCanvas.height = myVideo.videoHeight;
-        myCanvas.getContext('2d').drawImage(myVideo, 0, 0);
-
-        myVideo.srcObject.getTracks().forEach(track => track.stop())
-
-        sectionVideo.style.display = "none";
-        sectionPicture.style.display = "block";
-
-        let picture = myCanvas.toDataURL();
-
-        let markers = [];
-        let marker = { lat: e.latlng.lat, lng: e.latlng.lng, picture: picture };
-        markers.push(marker);
-
-        let storage = JSON.parse(localStorage.getItem("markers"));
-        console.log(storage)
-        if (storage != null) {
-            for (const mark of storage) {
-                markers.push(mark);
-            }
-        }
-
-        console.log(markers);
-
-        localStorage.setItem("markers", JSON.stringify(markers));
-    })
 }
 
-function onMapClick(e) {
-    let marker = L.marker([e.latlng.lat, e.latlng.lng]).on('click', (e) => { onMarkerClick(e) });
-    marker.addTo(map);
+function btnPictureClick() {
+    myCanvas.width = myVideo.videoWidth;
+    myCanvas.height = myVideo.videoHeight;
+    myCanvas.getContext('2d').drawImage(myVideo, 0, 0);
+
+    myVideo.srcObject.getTracks().forEach(track => track.stop())
+
+    sectionVideo.style.display = "none";
+    sectionPicture.style.display = "block";
+
+    let picture = myCanvas.toDataURL();
+
+    let markers = [];
+    let marker = { lat: latlng.lat, lng: latlng.lng, picture: picture };
+    markers.push(marker);
+
+    let storage = JSON.parse(localStorage.getItem("markers"));
+    console.log(storage)
+    if (storage != null) {
+        for (const mark of storage) {
+            markers.push(mark);
+        }
+    }
+
+    console.log(markers);
+
+    localStorage.setItem("markers", JSON.stringify(markers));
 }
