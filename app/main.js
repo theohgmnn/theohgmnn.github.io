@@ -8,7 +8,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 map.on('click', (e) => { onMapClick(e) });
 
-document.querySelector("#return").addEventListener('click', () => {
+btnReturn.addEventListener('click', () => {
     sectionMap.style.display = "block";
     sectionVideo.style.display = "none";
     sectionPicture.style.display = "none"
