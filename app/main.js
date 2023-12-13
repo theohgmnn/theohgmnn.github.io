@@ -1,14 +1,18 @@
-GVA_COORD = [46.2043907, 6.1431577];
-W_HD = 1280;
-H_HD = 720;
+const GVA_COORD = [46.2043907, 6.1431577];
+const MAP_ZOOM = 12;
+const W_HD = 1280;
+const H_HD = 720;
 
-let map = L.map('map').setView(GVA_COORD, 12);
-let latlng;
+let map = L.map('map').setView(GVA_COORD, MAP_ZOOM);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
+
+if (localStorage.getItem("markers") == null) {
+    localStorage.setItem("markers", "[]");
+}
 
 map.on('click', (e) => { onMapClick(e) });
 
@@ -17,10 +21,11 @@ for (const btn of btnReturn) {
         sectionMap.style.display = "block";
         sectionVideo.style.display = "none";
         sectionPicture.style.display = "none"
+        sectionMarker.style.display = "none"
     });
 }
 
-if (localStorage.getItem("markers") != null) {
+if (JSON.parse(localStorage.getItem("markers")).length != 0) {
     let markers = JSON.parse(localStorage.getItem("markers"));
     for (const point of markers) {
         let marker = L.marker([parseFloat(point.lat), parseFloat(point.lng)]).on('click', (e) => { onMarkerClick(e) });
@@ -28,18 +33,14 @@ if (localStorage.getItem("markers") != null) {
     }
 }
 
-btnPicture.addEventListener("click", () => btnPictureClick());
-
 function onMapClick(e) {
     let marker = L.marker([e.latlng.lat, e.latlng.lng]).on('click', (e) => { onMarkerClick(e) });
-    latlng = e.latlng;
     marker.addTo(map);
 }
 
 async function onMarkerClick(e) {
-    let storage = JSON.parse(localStorage.getItem("markers"));
-
-    if (storage != null) {
+    if (localStorage.getItem("markers") != "") {
+        let storage = JSON.parse(localStorage.getItem("markers"));
         for (const marker of storage) {
             if (marker.lat == e.latlng.lat && marker.lng == e.latlng.lng) {
                 sectionMap.style.display = "none";
@@ -68,9 +69,11 @@ async function onMarkerClick(e) {
     sectionVideo.style.display = "block";
 
     myVideo.srcObject = stream;
+
+    btnPicture.addEventListener("click", () => btnPictureClick(e.latlng));
 }
 
-function btnPictureClick() {
+function btnPictureClick(latlng) {
     myCanvas.width = myVideo.videoWidth;
     myCanvas.height = myVideo.videoHeight;
     myCanvas.getContext('2d').drawImage(myVideo, 0, 0);
@@ -82,18 +85,17 @@ function btnPictureClick() {
 
     let picture = myCanvas.toDataURL("image/jpeg");
 
-    let storage = JSON.parse(localStorage.getItem("markers"));
-    
-    if (storage != null) {
-        for (const mark of storage) {
-            storage.push(mark);
-        }
-    }
-
     let marker = { lat: latlng.lat, lng: latlng.lng, picture: picture };
-    storage.push(marker);
 
-    console.log(storage);
+    if (JSON.parse(localStorage.getItem("markers")).length != 0) {
+        let storage = JSON.parse(localStorage.getItem("markers"));
 
-    localStorage.setItem("markers", JSON.stringify(storage));
+        storage.push(marker);
+        localStorage.setItem("markers", JSON.stringify(storage));
+    }
+    else {
+        let markers = [];
+        markers.push(marker);
+        localStorage.setItem("markers", JSON.stringify(markers));
+    }
 }
