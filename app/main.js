@@ -1,4 +1,8 @@
-let map = L.map('map').setView([46.2043907, 6.1431577], 12);
+GVA_COORD = [46.2043907, 6.1431577];
+W_HD = 1280;
+H_HD = 720;
+
+let map = L.map('map').setView(GVA_COORD, 12);
 let latlng;
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -8,11 +12,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 map.on('click', (e) => { onMapClick(e) });
 
-btnReturn.addEventListener('click', () => {
-    sectionMap.style.display = "block";
-    sectionVideo.style.display = "none";
-    sectionPicture.style.display = "none"
-})
+for (const btn of btnReturn) {
+    btn.addEventListener('click', () => {
+        sectionMap.style.display = "block";
+        sectionVideo.style.display = "none";
+        sectionPicture.style.display = "none"
+    });
+}
 
 if (localStorage.getItem("markers") != null) {
     let markers = JSON.parse(localStorage.getItem("markers"));
@@ -30,28 +36,28 @@ function onMapClick(e) {
     marker.addTo(map);
 }
 
-async function onMarkerClick() {
+async function onMarkerClick(e) {
     let storage = JSON.parse(localStorage.getItem("markers"));
 
     if (storage != null) {
         for (const marker of storage) {
-            if (marker.lat == e.lat && marker.lng == e.lng) {
-                let img = document.querySelector("#sectionMarker img");
-
+            if (marker.lat == e.latlng.lat && marker.lng == e.latlng.lng) {
                 sectionMap.style.display = "none";
                 sectionMarker.style.display = "block";
 
-                img.src = marker.picture;
+                imgMarker.src = marker.picture;
                 lat.innerHTML = `Lat: ${marker.lat}`;
                 lng.innerHTML = `Lng: ${marker.lng}`;
+
+                return;
             }
         }
     }
 
     const constraints = {
         video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
+            width: { ideal: W_HD },
+            height: { ideal: H_HD },
             facingMode: { exact: "environment" },
         }
     };
@@ -74,21 +80,20 @@ function btnPictureClick() {
     sectionVideo.style.display = "none";
     sectionPicture.style.display = "block";
 
-    let picture = myCanvas.toDataURL();
-
-    let markers = [];
-    let marker = { lat: latlng.lat, lng: latlng.lng, picture: picture };
-    markers.push(marker);
+    let picture = myCanvas.toDataURL("image/jpeg");
 
     let storage = JSON.parse(localStorage.getItem("markers"));
-    console.log(storage)
+    
     if (storage != null) {
         for (const mark of storage) {
-            markers.push(mark);
+            storage.push(mark);
         }
     }
 
-    console.log(markers);
+    let marker = { lat: latlng.lat, lng: latlng.lng, picture: picture };
+    storage.push(marker);
 
-    localStorage.setItem("markers", JSON.stringify(markers));
+    console.log(storage);
+
+    localStorage.setItem("markers", JSON.stringify(storage));
 }
